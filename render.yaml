@@ -1,0 +1,30 @@
+# SIDE EYE — game server (WebSockets, in-memory rooms).
+#
+# Render runs a persistent Node process, which is what this needs and what a
+# static host cannot give it. The client is served separately from Netlify and
+# points here via VITE_SERVER_URL.
+#
+#   1. Push this repo to GitHub
+#   2. render.com → New → Blueprint → pick the repo
+#   3. Copy the resulting https://….onrender.com URL into Netlify:
+#        netlify env:set VITE_SERVER_URL https://<name>.onrender.com
+#        npm run build && netlify deploy --prod --dir client/dist
+#
+# Free instances sleep after ~15 min idle and take ~30s to wake. The client
+# shows a "can't reach the game server" bar and keeps retrying, so the first
+# player just waits rather than seeing a broken page.
+
+services:
+  - type: web
+    name: side-eye-server
+    runtime: node
+    plan: free
+    region: oregon
+    # --ignore-scripts skips the root postinstall, which would otherwise install
+    # the entire client build toolchain on a server that never builds the client.
+    buildCommand: npm ci --omit=dev --ignore-scripts
+    startCommand: node server/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
