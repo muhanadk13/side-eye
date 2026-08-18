@@ -32,8 +32,19 @@ WebSocket proxied to :3001.
 
 ## Deploying
 
-**The client is live at <https://side-eye-party.netlify.app>.** It needs a game
-server before anyone can actually play.
+**Live: <https://side-eye-party.netlify.app>**
+
+| Piece | Host | URL |
+| --- | --- | --- |
+| Client | Netlify | <https://side-eye-party.netlify.app> |
+| Game server | Render (free) | <https://side-eye-server.onrender.com> |
+
+Both redeploy from `main` — Render on push (autoDeploy), Netlify via
+`npm run build && netlify deploy --prod --dir client/dist`.
+
+The free Render instance sleeps after ~15 min idle and takes ~30s to wake. The
+client shows a "can't reach the game server" bar and keeps retrying, so the
+first player waits rather than seeing a broken page.
 
 ### Why it's split
 
@@ -43,7 +54,7 @@ functions — it can't hold a socket open, and its functions don't share memory
 between invocations. So Netlify hosts the client; the server needs a host that
 runs a persistent Node process.
 
-### 1. Put the server somewhere
+### Standing it up again elsewhere
 
 Any of these work. Free tiers are fine — a room is a few KB of memory.
 
@@ -56,7 +67,7 @@ Any of these work. Free tiers are fine — a room is a few KB of memory.
 The `Dockerfile` builds the client too, so any Docker host gives you the whole
 game on one URL with no Netlify needed at all.
 
-### 2. Point Netlify at it
+Then point the client at it:
 
 ```bash
 netlify env:set VITE_SERVER_URL https://your-server-url.onrender.com
